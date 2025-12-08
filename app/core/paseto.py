@@ -1,3 +1,4 @@
+import base64
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -31,7 +32,20 @@ def create_nexus_token(user_id: uuid.UUID, expires_in_minutes: int = 5) -> str:
     }
 
     # Crear clave simétrica para v4.local
-    key = Key.new(version=4, purpose="local", key=settings.PASETO_SECRET_KEY)
+    """
+    Inicializa el generador con la clave secreta de la configuración.
+    La clave debe ser de 32 bytes para PASETO v4.local.
+    """
+    # Decodificar la clave desde base64 (debe ser de 32 bytes)
+    secret = base64.b64decode(settings.PASETO_SECRET_KEY)
+    if len(secret) < 32:
+        # Pad con ceros si es menor
+        secret = secret.ljust(32, b"\0")
+    elif len(secret) > 32:
+        # Truncar si es mayor
+        secret = secret[:32]
+
+    key = Key.new(version=4, purpose="local", key=secret)
 
     token = pyseto.encode(key, payload)
 
