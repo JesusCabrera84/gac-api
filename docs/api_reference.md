@@ -1,117 +1,183 @@
 # GAC API Reference
 
-Base URL: `http://localhost:8000/api/v1`
+Documentación completa de la API de GAC.
 
-## Authentication
+**Base URL**: `http://localhost:8000/api/v1`
 
-### Login
-- **URL**: `/auth/login`
-- **Method**: `POST`
-- **Body**: `username` (email), `password` (form-data)
-- **Response**: Access and refresh tokens.
+---
 
-### Refresh Token
-- **URL**: `/auth/refresh`
-- **Method**: `POST`
-- **Query Param**: `refresh_token`
-- **Response**: New access token.
+## Índice de Documentación
 
-### Get Current User
-- **URL**: `/auth/me`
-- **Method**: `GET`
-- **Headers**: `Authorization: Bearer <token>`
-- **Response**: User profile and roles.
+| Módulo | Descripción | Autenticación |
+|--------|-------------|---------------|
+| [Autenticación](api/auth.md) | Login, refresh token, perfil de usuario | Público / Bearer |
+| [Usuarios](api/users.md) | CRUD de usuarios | Admin |
+| [Roles](api/roles.md) | Gestión de roles y permisos | Admin |
+| [Órdenes](api/orders.md) | Gestión de órdenes de compra | Bearer |
+| [Pagos](api/payments.md) | Registro y consulta de pagos | Bearer |
+| [Envíos](api/shipments.md) | Gestión de envíos y tracking | Bearer |
+| [Productos](api/products.md) | Catálogo de productos | Bearer |
+| [Dispositivos](api/devices.md) | Consulta de dispositivos | Bearer |
+| [API Interna](api/internal.md) | Tokens para comunicación entre servicios | Admin |
 
-## User Management (Admin Only)
+---
 
-### Create User
-- **URL**: `/users`
-- **Method**: `POST`
-- **Body**:
-    ```json
-    {
-      "email": "user@example.com",
-      "password": "securepassword",
-      "full_name": "John Doe",
-      "is_active": true,
-      "roles": ["admin", "user"]
-    }
-    ```
-- **Response**: Created user details.
+## Resumen de Endpoints
 
-### List Users
-- **URL**: `/users`
-- **Method**: `GET`
-- **Query Params**: `skip` (default 0), `limit` (default 100)
-- **Response**: List of users.
+### Autenticación (`/auth`)
 
-### Get User
-- **URL**: `/users/{user_id}`
-- **Method**: `GET`
-- **Response**: User details.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/auth/login` | Autenticar usuario |
+| `POST` | `/auth/refresh` | Refrescar access token |
+| `GET` | `/auth/me` | Obtener perfil del usuario actual |
 
-### Update User
-- **URL**: `/users/{user_id}`
-- **Method**: `PATCH`
-- **Body**:
-    ```json
-    {
-      "full_name": "New Name",
-      "is_active": false,
-      "roles": ["user"]
-    }
-    ```
-- **Response**: Updated user details.
+### Usuarios (`/users`) - Admin Only
 
-### Delete User (Soft Delete)
-- **URL**: `/users/{user_id}`
-- **Method**: `DELETE`
-- **Response**: Success status.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/users` | Crear usuario |
+| `GET` | `/users` | Listar usuarios |
+| `GET` | `/users/{user_id}` | Obtener usuario |
+| `PATCH` | `/users/{user_id}` | Actualizar usuario |
+| `DELETE` | `/users/{user_id}` | Desactivar usuario |
 
-## Role Management (Admin Only)
+### Roles (`/roles`) - Admin Only
 
-### Create Role
-- **URL**: `/roles`
-- **Method**: `POST`
-- **Body**: `{"name": "role_name"}`
-- **Response**: Created role.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/roles` | Crear rol |
+| `GET` | `/roles` | Listar roles |
+| `POST` | `/users/{user_id}/roles/{role_id}` | Asignar rol a usuario |
+| `DELETE` | `/users/{user_id}/roles/{role_id}` | Revocar rol de usuario |
 
-### List Roles
-- **URL**: `/roles`
-- **Method**: `GET`
-- **Response**: List of all roles.
+### Órdenes (`/orders`)
 
-### Assign Role
-- **URL**: `/users/{user_id}/roles/{role_id}`
-- **Method**: `POST`
-- **Response**: Success status.
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/orders` | Crear orden |
+| `GET` | `/orders/{order_id}` | Obtener orden |
+| `GET` | `/clients/{client_id}/orders` | Órdenes de un cliente |
 
-### Revoke Role
-- **URL**: `/users/{user_id}/roles/{role_id}`
-- **Method**: `DELETE`
-- **Response**: Success status.
+### Pagos (`/payments`)
 
-## Business Resources
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/payments` | Registrar pago |
+| `GET` | `/payments/{payment_id}` | Obtener pago |
+| `GET` | `/clients/{client_id}/payments` | Pagos de un cliente |
 
-### Orders
-- **Create Order**: `POST /orders`
-- **Get Order**: `GET /orders/{order_id}`
-- **Get Client Orders**: `GET /clients/{client_id}/orders`
+### Envíos (`/shipments`)
 
-### Payments
-- **Create Payment**: `POST /payments`
-- **Get Payment**: `GET /payments/{payment_id}`
-- **Get Client Payments**: `GET /clients/{client_id}/payments`
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/shipments` | Crear envío |
+| `PATCH` | `/shipments/{shipment_id}/status` | Actualizar estado |
+| `GET` | `/clients/{client_id}/shipments` | Envíos de un cliente |
 
-### Shipments
-- **Create Shipment**: `POST /shipments`
-- **Update Status**: `PATCH /shipments/{shipment_id}/status`
-- **Get Client Shipments**: `GET /clients/{client_id}/shipments`
+### Productos (`/products`)
 
-### Products
-- **List Products**: `GET /products`
-- **Create Product**: `POST /products`
-    - Body: `{"key": "str", "name": "str", "description": "str"}`
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/products` | Listar productos |
+| `POST` | `/products` | Crear producto |
 
-### Devices
-- **List Devices**: `GET /devices`
+### Dispositivos (`/devices`)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/devices` | Listar dispositivos |
+
+### API Interna (`/internal`)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/internal/tokens/nexus` | Generar token PASETO para Nexus |
+
+---
+
+## Autenticación
+
+La API utiliza autenticación basada en tokens JWT (Bearer tokens).
+
+### Obtener Token
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/auth/login" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "username=admin@example.com&password=secretpassword"
+```
+
+### Usar Token
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/auth/me" \
+  -H "Authorization: Bearer <access_token>"
+```
+
+---
+
+## Formato de Respuesta
+
+Todas las respuestas siguen el formato estándar `ResponseModel`:
+
+```json
+{
+  "message": "Descripción del resultado",
+  "data": { ... }
+}
+```
+
+### Códigos de Estado Comunes
+
+| Código | Descripción |
+|--------|-------------|
+| `200` | Operación exitosa |
+| `201` | Recurso creado |
+| `400` | Error en la solicitud |
+| `401` | No autenticado |
+| `403` | Sin permisos |
+| `404` | Recurso no encontrado |
+| `500` | Error interno del servidor |
+
+---
+
+## Tipos de Datos Comunes
+
+### UUID
+Todos los IDs son UUIDs v4 en formato string:
+```
+"550e8400-e29b-41d4-a716-446655440000"
+```
+
+### Fechas
+Las fechas se devuelven en formato ISO 8601:
+```
+"2025-12-16T10:00:00Z"
+```
+
+---
+
+## Paginación
+
+Algunos endpoints soportan paginación con los parámetros:
+
+| Parámetro | Tipo | Default | Descripción |
+|-----------|------|---------|-------------|
+| `skip` | integer | `0` | Registros a omitir |
+| `limit` | integer | `100` | Máximo de registros |
+
+Ejemplo:
+```bash
+curl "http://localhost:8000/api/v1/users?skip=0&limit=10"
+```
+
+---
+
+## Notas de Seguridad
+
+- Siempre usar HTTPS en producción
+- Los tokens de acceso tienen expiración corta
+- Los refresh tokens tienen expiración más larga
+- Las contraseñas se almacenan hasheadas con Argon2
+- Los tokens internos (PASETO) expiran en 5 minutos
