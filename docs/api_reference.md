@@ -31,6 +31,7 @@ Documentación completa de la API de GAC.
 | `POST` | `/auth/login` | Autenticar usuario |
 | `POST` | `/auth/refresh` | Refrescar access token |
 | `GET` | `/auth/me` | Obtener perfil del usuario actual |
+| `PATCH` | `/auth/password` | Cambiar contraseña propia |
 
 ### Usuarios (`/users`) - Admin Only
 
@@ -40,6 +41,7 @@ Documentación completa de la API de GAC.
 | `GET` | `/users` | Listar usuarios |
 | `GET` | `/users/{user_id}` | Obtener usuario |
 | `PATCH` | `/users/{user_id}` | Actualizar usuario |
+| `PATCH` | `/users/{user_id}/password` | Resetear contraseña |
 | `DELETE` | `/users/{user_id}` | Desactivar usuario |
 
 ### Roles (`/roles`) - Admin Only

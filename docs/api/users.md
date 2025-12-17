@@ -300,10 +300,75 @@ curl -X DELETE "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-44665
 
 ---
 
+## PATCH `/users/{user_id}/password`
+
+Resetea la contraseña de un usuario (solo admin).
+
+### Descripción
+
+Permite a un administrador resetear la contraseña de cualquier usuario sin conocer la contraseña actual. Útil para soporte técnico cuando un usuario olvida su contraseña.
+
+### Request
+
+**Headers**:
+
+| Header          | Valor                    | Requerido |
+|-----------------|--------------------------|-----------|
+| `Authorization` | `Bearer <access_token>`  | ✅        |
+| `Content-Type`  | `application/json`       | ✅        |
+
+**Path Parameters**:
+
+| Parámetro | Tipo | Descripción          |
+|-----------|------|----------------------|
+| `user_id` | UUID | ID del usuario       |
+
+**Body**:
+
+| Campo          | Tipo   | Requerido | Descripción              |
+|----------------|--------|-----------|--------------------------|
+| `new_password` | string | ✅        | Nueva contraseña         |
+
+```json
+{
+  "new_password": "NuevaContraseña123!"
+}
+```
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "message": "Password reset successfully",
+  "data": true
+}
+```
+
+### Errores
+
+| Status | Descripción                      |
+|--------|----------------------------------|
+| `403`  | Sin permisos (no es admin)       |
+| `404`  | Usuario no encontrado            |
+
+### Ejemplo cURL
+
+```bash
+curl -X PATCH "http://localhost:8000/api/v1/users/550e8400-e29b-41d4-a716-446655440001/password" \
+  -H "Authorization: Bearer <admin_token>" \
+  -H "Content-Type: application/json" \
+  -d '{"new_password": "NuevaContraseña123!"}'
+```
+
+---
+
 ## Notas
 
 - Todos los endpoints requieren autenticación con rol `admin`
 - Los IDs de usuario son UUIDs v4
 - La eliminación es "soft delete" (solo desactiva `is_active`)
 - Las contraseñas se almacenan hasheadas con Argon2
+- El reset de contraseña no invalida los tokens existentes del usuario
 

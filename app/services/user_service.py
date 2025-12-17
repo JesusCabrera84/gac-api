@@ -78,6 +78,15 @@ class UserService:
         await self.db.commit()
         return True
 
+    async def change_password(self, user_id: UUID, new_password: str) -> bool:
+        user = await self.get_user(user_id)
+        if not user:
+            return False
+
+        user.password_hash = get_password_hash(new_password)
+        await self.db.commit()
+        return True
+
     async def _sync_roles(self, user_id: UUID, role_names: List[str]):
         # Clear existing roles
         stmt = delete(UserRole).where(UserRole.user_id == user_id)

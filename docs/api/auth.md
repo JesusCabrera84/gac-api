@@ -137,10 +137,69 @@ curl -X GET "http://localhost:8000/api/v1/auth/me" \
 
 ---
 
+## PATCH `/auth/password`
+
+Cambia la contraseña del usuario autenticado.
+
+### Descripción
+
+Permite al usuario autenticado cambiar su propia contraseña. No requiere la contraseña actual, solo un token de acceso válido.
+
+### Request
+
+**Headers**:
+
+| Header          | Valor                    | Requerido |
+|-----------------|--------------------------|-----------|
+| `Authorization` | `Bearer <access_token>`  | ✅        |
+| `Content-Type`  | `application/json`       | ✅        |
+
+**Body**:
+
+| Campo          | Tipo   | Requerido | Descripción              |
+|----------------|--------|-----------|--------------------------|
+| `new_password` | string | ✅        | Nueva contraseña         |
+
+```json
+{
+  "new_password": "NuevaContraseña123!"
+}
+```
+
+### Response
+
+**Status**: `200 OK`
+
+```json
+{
+  "message": "Password changed successfully",
+  "data": true
+}
+```
+
+### Errores
+
+| Status | Descripción                      |
+|--------|----------------------------------|
+| `400`  | Error al cambiar contraseña      |
+| `403`  | Token inválido o expirado        |
+
+### Ejemplo cURL
+
+```bash
+curl -X PATCH "http://localhost:8000/api/v1/auth/password" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json" \
+  -d '{"new_password": "NuevaContraseña123!"}'
+```
+
+---
+
 ## Notas de Seguridad
 
 - Los tokens de acceso tienen una expiración corta (configurada en `ACCESS_TOKEN_EXPIRES_MINUTES`)
 - Los tokens de refresco tienen una expiración más larga (configurada en `REFRESH_TOKEN_EXPIRES_DAYS`)
 - Siempre usar HTTPS en producción
 - No almacenar tokens en localStorage; preferir httpOnly cookies cuando sea posible
+- El cambio de contraseña no invalida los tokens existentes (considerar implementar revocación si es necesario)
 

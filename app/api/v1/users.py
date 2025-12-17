@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.api.deps import require_roles
 from app.schemas.common import ResponseModel
 from app.schemas.users import UserCreate, UserUpdate, UserResponse
+from app.schemas.auth import PasswordUpdate
 from app.services.user_service import UserService
 
 router = APIRouter()
@@ -125,3 +126,24 @@ async def delete_user(user_id: UUID, db: Annotated[AsyncSession, Depends(get_db)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return ResponseModel(message="User deactivated successfully", data=True)
+
+
+@router.patch(
+    "/users/{user_id}/password",
+    response_model=ResponseModel[bool],
+    dependencies=[Depends(require_roles(["admin"]))],
+)
+async def reset_user_password(
+    user_id: UUID,
+    password_in: PasswordUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """
+    Resetea la contraseña de un usuario (solo admin).
+    No requiere la contraseña actual del usuario.
+    """
+    service = UserService(db)
+    success = await service.change_password(user_id, password_in.new_password)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+    return ResponseModel(message="Password reset successfully", data=True)

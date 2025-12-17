@@ -7,8 +7,9 @@ from app.core.database import get_db
 from app.api.deps import get_current_user
 from app.models.users import User
 from app.schemas.common import ResponseModel
-from app.schemas.auth import Token, UserResponse
+from app.schemas.auth import Token, UserResponse, PasswordUpdate
 from app.services.auth_service import AuthService
+from app.services.user_service import UserService
 
 router = APIRouter()
 
@@ -63,3 +64,25 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
         roles=roles,
     )
     return ResponseModel(message="User profile retrieved", data=user_response)
+
+
+@router.patch("/auth/password", response_model=ResponseModel[bool])
+async def change_my_password(
+    password_in: PasswordUpdate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """
+    Cambia la contraseña del usuario autenticado.
+    No requiere la contraseña actual, solo estar autenticado.
+    """
+    service = UserService(db)
+    success = await service.change_password(
+        current_user.user_id, password_in.new_password
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to change password",
+        )
+    return ResponseModel(message="Password changed successfully", data=True)
