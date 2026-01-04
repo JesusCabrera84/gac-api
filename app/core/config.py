@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
+    DB_SCHEME: str = "public"
 
     JWT_SECRET: str
     JWT_ALGORITHM: str = "HS256"
